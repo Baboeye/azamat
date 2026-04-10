@@ -259,25 +259,44 @@ class Command(BaseCommand):
         """Создание приемок и отпусков материалов"""
         admin_user = User.objects.filter(username='azama').first()
         contractor = Contractor.objects.filter(contractor_type='supplier').first()
+        materials = list(Material.objects.all()[:3])
         
-        if not admin_user or not contractor:
+        if not admin_user or not contractor or not materials:
             return
         
-        # Приемка
         created_receipts = 0
-        for i in range(3):
+        created_issues = 0
+
+        for index, material in enumerate(materials, start=1):
             receipt, created = Receipt.objects.get_or_create(
-                source=contractor,
-                created_at=timezone.now() - timedelta(days=i*5),
+                material=material,
+                document_number=f'RCPT-{index:04d}',
                 defaults={
+                    'quantity': 100 + index * 25,
+                    'price': material.price_per_unit or 0,
+                    'contractor': contractor,
                     'created_by': admin_user,
-                    'description': f'Приемка материалов #{i+1}'
+                    'notes': f'Тестовая приемка материала {material.name}',
                 }
             )
             if created:
                 created_receipts += 1
+
+            issue, created = Issue.objects.get_or_create(
+                material=material,
+                issued_to='Производственный цех',
+                purpose=f'Плановый расход материала {material.name}',
+                defaults={
+                    'quantity': 10 + index * 3,
+                    'destination': 'Швейный участок',
+                    'created_by': admin_user,
+                }
+            )
+            if created:
+                created_issues += 1
         
         self.stdout.write(f'✅ Приемки: создано {created_receipts}, всего {Receipt.objects.count()}')
+        self.stdout.write(f'✅ Расходы: создано {created_issues}, всего {Issue.objects.count()}')
 
     def create_products(self):
         """Создание готовых продуктов"""
