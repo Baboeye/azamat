@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Отчёт по остаткам</h1>
+
+<table>
+<tr>
+    <th>Материал</th>
+    <th>Количество</th>
+</tr>
+
+{% for m in materials %}
+<tr>
+    <td>{{ m.name }}</td>
+    <td>{{ m.quantity }} {{ m.unit }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}

@@ -1,0 +1,92 @@
+<!-- production/templates/production/category_form.html (обновленный) -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            {% if is_edit %}✏️ Редактирование категории{% else %}➕ Новая категория спецодежды{% endif %}
+        </h1>
+        {% if is_edit %}
+        <p class="page-subtitle">Редактирование: {{ category.name }}</p>
+        {% endif %}
+    </div>
+    <a href="{% url 'template_list' %}" class="btn btn-secondary">← Назад</a>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label">Название категории *</label>
+            {{ form.name }}
+            <small style="color: var(--text-muted); font-size: 12px;">
+                Например: Костюм рабочий утепленный
+            </small>
+        </div>
+        
+        <div class="form-group" style="margin-top: 20px;">
+            <label class="form-label">Тип климата *</label>
+            {{ form.climate_type }}
+        </div>
+        
+        <div class="form-group" style="margin-top: 20px;">
+            <label class="form-label">Температурный диапазон *</label>
+            {{ form.temperature_range }}
+            <small style="color: var(--text-muted); font-size: 12px;">
+                Например: от -40°C до -20°C
+            </small>
+        </div>
+        
+        <div class="form-group" style="margin-top: 20px;">
+            <label class="form-label">Описание</label>
+            {{ form.description }}
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary flex-1">
+                {% if is_edit %}💾 Сохранить изменения{% else %}💾 Создать категорию{% endif %}
+            </button>
+            <a href="{% url 'template_list' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% if is_edit %}
+<div class="card" style="margin-top: 24px; border-color: var(--danger);">
+    <h4 style="color: var(--danger); margin-bottom: 16px;">🗑️ Опасная зона</h4>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">
+        Удаление категории приведет к невозможности создавать новые модели в этой категории.
+        {% if category.templates.count > 0 %}
+        <br><strong style="color: var(--danger);">Внимание: в категории {{ category.templates.count }} моделей!</strong>
+        {% endif %}
+    </p>
+    <a href="{% url 'category_delete' category.id %}" class="btn btn-danger">
+        🗑️ Удалить категорию
+    </a>
+</div>
+{% else %}
+<div class="card" style="margin-top: 24px;">
+    <h4 style="margin-bottom: 16px;">🌍 Типы климата</h4>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 13px;">
+        <div style="padding: 12px; background: rgba(0,234,255,0.1); border-radius: 8px;">
+            <strong style="color: #00eaff;">Холодный климат</strong>
+            <p style="color: var(--text-muted); margin: 4px 0 0 0;">Зимняя спецодежда для севера</p>
+        </div>
+        <div style="padding: 12px; background: rgba(0,176,155,0.1); border-radius: 8px;">
+            <strong style="color: #00b09b;">Умеренный климат</strong>
+            <p style="color: var(--text-muted); margin: 4px 0 0 0;">Демисезонная одежда</p>
+        </div>
+        <div style="padding: 12px; background: rgba(249,212,35,0.1); border-radius: 8px;">
+            <strong style="color: #f9d423;">Жаркий климат</strong>
+            <p style="color: var(--text-muted); margin: 4px 0 0 0;">Летняя спецодежда</p>
+        </div>
+        <div style="padding: 12px; background: rgba(255,65,108,0.1); border-radius: 8px;">
+            <strong style="color: #ff416c;">Экстремальные условия</strong>
+            <p style="color: var(--text-muted); margin: 4px 0 0 0;">Защитная одежда</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

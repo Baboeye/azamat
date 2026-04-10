@@ -1,0 +1,36 @@
+
+[
+    {
+        "model": "production.productmaterialrequirement",
+        "pk": 1,
+        "fields": {
+            "product_template": 1,
+            "material": 1,
+            "quantity_per_unit": 3.5,
+            "waste_percent": 8,
+            "notes": "Основная ткань костюма, учитывать направление ворса"
+        }
+    },
+    {
+        "model": "production.productmaterialrequirement",
+        "pk": 2,
+        "fields": {
+            "product_template": 1,
+            "material": 2,
+            "quantity_per_unit": 1.2,
+            "waste_percent": 5,
+            "notes": "Подкладка для утепления"
+        }
+    },
+    {
+        "model": "production.productmaterialrequirement",
+        "pk": 3,
+        "fields": {
+            "product_template": 1,
+            "material": 5,
+            "quantity_per_unit": 0.8,
+            "waste_percent": 10,
+            "notes": "Утеплитель для рукавов и спинки"
+        }
+    }
+]

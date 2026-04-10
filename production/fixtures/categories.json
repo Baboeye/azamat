@@ -1,0 +1,42 @@
+[
+    {
+        "model": "production.productcategory",
+        "pk": 1,
+        "fields": {
+            "name": "Костюм рабочий утепленный",
+            "climate_type": "cold",
+            "description": "Зимняя спецодежда для работы в условиях крайнего севера",
+            "temperature_range": "от -40°C до -20°C"
+        }
+    },
+    {
+        "model": "production.productcategory",
+        "pk": 2,
+        "fields": {
+            "name": "Куртка демисезонная",
+            "climate_type": "moderate",
+            "description": "Переходная спецодежда для весны и осени",
+            "temperature_range": "от -5°C до +15°C"
+        }
+    },
+    {
+        "model": "production.productcategory",
+        "pk": 3,
+        "fields": {
+            "name": "Костюм летний",
+            "climate_type": "hot",
+            "description": "Легкая спецодежда для жаркого климата",
+            "temperature_range": "от +20°C до +45°C"
+        }
+    },
+    {
+        "model": "production.productcategory",
+        "pk": 4,
+        "fields": {
+            "name": "Костюм антистатический",
+            "climate_type": "extreme",
+            "description": "Защитная одежда для работы с ЛВЖ и ГВЖ",
+            "temperature_range": "от -20°C до +40°C"
+        }
+    }
+]

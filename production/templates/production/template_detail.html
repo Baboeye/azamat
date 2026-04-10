@@ -1,0 +1,119 @@
+<!-- production/templates/production/template_detail.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 class="page-title">{{ template.name }}</h1>
+            <span class="climate-badge climate-{{ template.category.climate_type }}">
+                {{ template.category.get_climate_type_display }}
+            </span>
+        </div>
+        <p class="page-subtitle">
+            Артикул: <code>{{ template.article }}</code> | 
+            Защита: <span class="protection-level protection-{{ template.protection_level }}">{{ template.get_protection_level_display }}</span>
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'requirement_add' template.id %}" class="btn btn-secondary">➕ Добавить материал</a>
+        <a href="{% url 'production_order_create' %}" class="btn btn-primary">🚀 Произвести</a>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">📋 Характеристики</h3>
+        
+        {% if template.description %}
+        <div style="margin-bottom: 20px;">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Описание</div>
+            <div>{{ template.description }}</div>
+        </div>
+        {% endif %}
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Вес комплекта</div>
+                <div style="font-weight: 600;">{{ template.weight_kg }} кг</div>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Диапазон температур</div>
+                <div style="font-weight: 600;">{{ template.category.temperature_range }}</div>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Размеры</div>
+                <div style="font-weight: 600;">{{ template.sizes_available }}</div>
+            </div>
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Цвета</div>
+                <div style="font-weight: 600;">{{ template.colors_available }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">📊 Нормы расхода материалов</h3>
+        
+        {% if requirements %}
+        <div class="operation-list">
+            {% for req in requirements %}
+            <div class="operation-item">
+                <div class="operation-icon" style="background: rgba(0, 234, 255, 0.15);">📦</div>
+                <div class="operation-content">
+                    <div class="operation-title">{{ req.material.name }}</div>
+                    <div class="operation-meta">
+                        Арт. {{ req.material.article }} | Отходы: {{ req.waste_percent }}%
+                    </div>
+                </div>
+                <div class="operation-quantity" style="color: var(--primary);">
+                    {{ req.quantity_per_unit }} {{ req.material.unit }}
+                </div>
+            </div>
+            {% if req.notes %}
+            <div style="margin: -8px 0 12px 56px; padding: 8px 12px; background: var(--bg-hover); border-radius: 6px; font-size: 12px; color: var(--text-muted);">
+                💡 {{ req.notes }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        
+        <div style="margin-top: 20px; padding: 16px; background: var(--bg-input); border-radius: 10px;">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Итого материалов на 1 изделие</div>
+            <div style="font-weight: 600; color: var(--primary);">
+                {{ requirements.count }} позиций
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 40px;">
+            <p>Нормы расхода не заданы</p>
+            <a href="{% url 'requirement_add' template.id %}" class="btn btn-primary">Добавить первый материал</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- История производства -->
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">🏭 История производства этой модели</h3>
+    {% with productions=template.products.all|slice:":10" %}
+    {% if productions %}
+    <div class="operation-list">
+        {% for prod in productions %}
+        <div class="operation-item">
+            <div class="operation-content">
+                <div class="operation-title">Партия {{ prod.batch_number }}</div>
+                <div class="operation-meta">
+                    {{ prod.production_date|date:"d.m.Y" }} | {{ prod.size }} | {{ prod.color }}
+                </div>
+            </div>
+            <div class="operation-quantity">x{{ prod.quantity_produced }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted);">Эта модель еще не производилась</p>
+    {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}

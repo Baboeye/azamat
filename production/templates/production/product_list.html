@@ -1,0 +1,85 @@
+<!-- production/templates/production/product_list.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📦 Готовая продукция</h1>
+        <p class="page-subtitle">Всего: {{ total_count }} позиций</p>
+    </div>
+    <a href="{% url 'production_order_create' %}" class="btn btn-primary">➕ Новый заказ</a>
+</div>
+
+<div class="card mb-3">
+    <form method="get" class="filter-bar">
+        {{ filter_form.search }}
+        {{ filter_form.category }}
+        {{ filter_form.climate }}
+        {{ filter_form.status }}
+        <button type="submit" class="btn btn-primary">🔍 Фильтр</button>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">Сбросить</a>
+    </form>
+</div>
+
+{% if products %}
+<div class="materials-grid">
+    {% for product in products %}
+    <a href="{% url 'product_detail' product.id %}" class="material-card production-card" 
+       data-status="{{ product.get_status_display }}" 
+       style="{% if product.status == 'ready' %}border-color: var(--success);{% endif %}">
+        <div class="material-image-placeholder" style="height: 120px; font-size: 36px;">
+            {% if product.template.category.climate_type == 'cold' %}❄️
+            {% elif product.template.category.climate_type == 'hot' %}☀️
+            {% elif product.template.category.climate_type == 'extreme' %}⚠️
+            {% else %}👷{% endif %}
+        </div>
+        <div class="material-body">
+            <div class="material-header">
+                <div>
+                    <div class="material-title">{{ product.template.name }}</div>
+                    <div class="material-article">Партия {{ product.batch_number }}</div>
+                </div>
+            </div>
+            
+            <div style="margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                <span class="badge badge-primary">{{ product.size }}</span>
+                <span class="badge" style="background: var(--bg-hover);">{{ product.color }}</span>
+                <span class="climate-badge climate-{{ product.template.category.climate_type }}" style="font-size: 10px;">
+                    {{ product.template.category.get_climate_type_display|slice:":5" }}
+                </span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-muted);">
+                    {{ product.production_date|date:"d.m.Y" }}
+                </span>
+                <span style="font-weight: 600; color: var(--primary);">
+                    x{{ product.quantity_produced }}
+                </span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% if products.has_other_pages %}
+<div class="pagination">
+    {% if products.has_previous %}
+    <a href="?page={{ products.previous_page_number }}" class="page-link">←</a>
+    {% endif %}
+    <span class="page-link active">{{ products.number }}</span>
+    {% if products.has_next %}
+    <a href="?page={{ products.next_page_number }}" class="page-link">→</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>Продукция не найдена</h3>
+    <p>Создайте первый производственный заказ</p>
+    <a href="{% url 'production_order_create' %}" class="btn btn-primary">Создать заказ</a>
+</div>
+{% endif %}
+{% endblock %}

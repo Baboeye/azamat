@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Контрагенты - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Контрагенты</h1>
+    <a href="{% url 'add_contractor' %}" class="btn btn-primary">➕ Добавить</a>
+</div>
+
+{% if suppliers %}
+<h2 style="margin-bottom: 20px; color: var(--text-muted); font-size: 18px;">Поставщики</h2>
+<div class="stats-grid" style="margin-bottom: 30px;">
+    {% for contractor in suppliers %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <span class="badge badge-primary" style="margin-bottom: 8px;">Поставщик</span>
+                <h3 style="margin-bottom: 8px;">{{ contractor.name }}</h3>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <a href="{% url 'edit_contractor' contractor.id %}" class="btn btn-secondary btn-sm">✏️</a>
+                <a href="{% url 'delete_contractor' contractor.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить?')">🗑️</a>
+            </div>
+        </div>
+        
+        <div style="margin-top: 16px; color: var(--text-muted); font-size: 14px;">
+            {% if contractor.address %}
+            <p style="margin-bottom: 4px;">📍 {{ contractor.address }}</p>
+            {% endif %}
+            {% if contractor.contact_info %}
+            <p>📞 {{ contractor.contact_info }}</p>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+            <span style="color: var(--text-muted); font-size: 13px;">
+                Материалов: {{ contractor.materials.count }}
+            </span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if customers %}
+<h2 style="margin-bottom: 20px; color: var(--text-muted); font-size: 18px;">Заказчики</h2>
+<div class="stats-grid">
+    {% for contractor in customers %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <span class="badge" style="margin-bottom: 8px; background: rgba(249, 212, 35, 0.15); color: var(--warning);">Заказчик</span>
+                <h3 style="margin-bottom: 8px;">{{ contractor.name }}</h3>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <a href="{% url 'edit_contractor' contractor.id %}" class="btn btn-secondary btn-sm">✏️</a>
+                <a href="{% url 'delete_contractor' contractor.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить?')">🗑️</a>
+            </div>
+        </div>
+        
+        <div style="margin-top: 16px; color: var(--text-muted); font-size: 14px;">
+            {% if contractor.address %}
+            <p style="margin-bottom: 4px;">📍 {{ contractor.address }}</p>
+            {% endif %}
+            {% if contractor.contact_info %}
+            <p>📞 {{ contractor.contact_info }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not suppliers and not customers %}
+<div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>Контрагенты не добавлены</h3>
+    <a href="{% url 'add_contractor' %}" class="btn btn-primary">Добавить первого</a>
+</div>
+{% endif %}
+{% endblock %}

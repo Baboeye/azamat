@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Панель управления - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Панель управления</h1>
+    <span style="color: var(--text-muted);">{{ now|date:"d.m.Y H:i" }}</span>
+</div>
+
+<div class="stats-grid">
+    <div class="card stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="card-title">Всего материалов</div>
+        <div class="card-value">{{ total_materials }}</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="card-title">Общий остаток</div>
+        <div class="card-value">{{ total_quantity }}</div>
+    </div>
+    <div class="card stat-card {% if low_stock > 0 %}critical{% endif %}">
+        <div class="stat-icon">⚠️</div>
+        <div class="card-title">Критический остаток</div>
+        <div class="card-value" style="color: {% if low_stock > 0 %}var(--danger){% endif %};">{{ low_stock }}</div>
+        {% if low_stock > 0 %}
+        <div class="card-footer">
+            <a href="{% url 'materials' %}?stock_status=low" style="color: var(--danger);">Просмотреть →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- График с ограниченной высотой -->
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">📈 Остатки материалов (Топ-10)</h3>
+        <div style="position: relative; height: 300px; max-height: 300px;">
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">⚠️ Требуют внимания</h3>
+        {% if critical_materials %}
+        <div class="operation-list">
+            {% for m in critical_materials %}
+            <a href="{% url 'material_detail' m.id %}" class="operation-item" style="text-decoration: none; color: inherit;">
+                <div class="operation-icon" style="background: rgba(255, 65, 108, 0.15);">⚠️</div>
+                <div class="operation-content">
+                    <div class="operation-title">{{ m.name }}</div>
+                    <div class="operation-meta">Остаток: {{ m.quantity }} {{ m.unit }} | Мин: {{ m.min_stock }}</div>
+                </div>
+                <div class="operation-quantity" style="color: var(--danger);">{{ m.quantity }}</div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 40px;">
+            <div style="font-size: 48px;">✅</div>
+            <p>Все остатки в норме</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">🕐 Последние операции</h3>
+    {% if recent_operations %}
+    <div class="operation-list">
+        {% for op in recent_operations %}
+        <div class="operation-item {{ op.action }}">
+            <div class="operation-icon">{{ op.action_icon }}</div>
+            <div class="operation-content">
+                <div class="operation-title">{{ op.get_action_display }}: {{ op.material.name }}</div>
+                <div class="operation-meta">
+                    {% if op.user %}{{ op.user.username }}{% else %}Система{% endif %} | 
+                    {{ op.created_at|date:"d.m.Y H:i" }}
+                </div>
+            </div>
+            {% if op.quantity != 0 %}
+            <div class="operation-quantity">{% if op.quantity > 0 %}+{% endif %}{{ op.quantity }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    <div style="margin-top: 16px; text-align: center;">
+        <a href="{% url 'audit_log' %}" class="btn btn-secondary">Все операции →</a>
+    </div>
+    {% else %}
+    <p>Нет операций</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('stockChart').getContext('2d');
+const chartData = {{ chart_data|safe }};
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: chartData.labels,
+        datasets: [{
+            label: 'Остаток',
+            data: chartData.quantities,
+            backgroundColor: chartData.colors,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,  // Важно!
+        plugins: { 
+            legend: { display: false } 
+        },
+        scales: {
+            y: { 
+                beginAtZero: true, 
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+            },
+            x: { 
+                grid: { display: false },
+                ticks: { 
+                    color: 'rgba(255, 255, 255, 0.6)', 
+                    maxRotation: 45,
+                    autoSkip: true,
+                    maxTicksLimit: 10
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

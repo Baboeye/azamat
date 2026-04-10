@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}{{ material.name }} - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <h1 class="page-title">{{ material.name }}</h1>
+            {% if material.is_low_stock %}
+            <span class="badge badge-danger">⚠️ Критический остаток</span>
+            {% endif %}
+        </div>
+        <p class="page-subtitle">
+            Артикул: <code>{{ material.article }}</code> | 
+            Секция: {{ material.section.name }} | 
+            Обновлено: {{ material.updated_at|date:"d.m.Y H:i" }}
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'material_edit' material.id %}" class="btn btn-secondary">✏️ Редактировать</a>
+        <a href="{% url 'material_delete' material.id %}" class="btn btn-danger" onclick="return confirm('Удалить материал?')">🗑️ Удалить</a>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Остаток и стоимость -->
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">📊 Текущий остаток</h3>
+        <div style="text-align: center; padding: 30px;">
+            <div style="font-size: 64px; font-weight: 700; color: var(--primary);">{{ material.quantity }}</div>
+            <div style="font-size: 24px; color: var(--text-muted);">{{ material.unit }}</div>
+        </div>
+        
+        {% if material.price_per_unit > 0 %}
+        <div style="margin: 20px 0; padding: 16px; background: rgba(0, 176, 155, 0.1); border-radius: 10px; border-left: 3px solid var(--success);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-muted);">Цена за {{ material.unit }}:</span>
+                <span style="font-size: 18px; font-weight: 600; color: var(--success);">{{ material.price_per_unit|floatformat:2 }} ₽</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                <span style="color: var(--text-muted);">Общая стоимость:</span>
+                <span style="font-size: 20px; font-weight: 700; color: var(--primary);">{{ material.total_value|floatformat:2 }} ₽</span>
+            </div>
+        </div>
+        {% else %}
+        <div style="margin: 20px 0; padding: 16px; background: rgba(249, 212, 35, 0.1); border-radius: 10px; border-left: 3px solid var(--warning);">
+            <p style="margin: 0; color: var(--warning); font-size: 14px;">
+                ⚠️ Цена не установлена. Укажите цену для расчета себестоимости производства.
+            </p>
+        </div>
+        {% endif %}
+        
+        <div class="progress-bar" style="height: 10px; margin: 20px 0;">
+            <div class="progress-fill {{ material.status_class }}" style="width: {{ material.stock_percent }}%"></div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px;">
+            <div class="text-center">
+                <div style="font-size: 12px; color: var(--text-muted);">Мин. остаток</div>
+                <div style="font-size: 20px; font-weight: 600;">{{ material.min_stock }}</div>
+            </div>
+            <div class="text-center">
+                <div style="font-size: 12px; color: var(--text-muted);">Приход</div>
+                <div style="font-size: 20px; font-weight: 600; color: var(--success);">{{ total_receipts }}</div>
+            </div>
+            <div class="text-center">
+                <div style="font-size: 12px; color: var(--text-muted);">Расход</div>
+                <div style="font-size: 20px; font-weight: 600; color: var(--danger);">{{ total_issues }}</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <a href="{% url 'material_receipt' material.id %}" class="btn btn-primary flex-1">➕ Приход</a>
+            <a href="{% url 'material_issue' material.id %}" class="btn btn-secondary flex-1">➖ Расход</a>
+            <a href="{% url 'material_scrap' material.id %}" class="btn btn-danger flex-1">🗑️ Списание</a>
+        </div>
+    </div>
+    
+    <!-- Характеристики -->
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">📋 Характеристики</h3>
+        
+        {% if material.description %}
+        <div style="margin-bottom: 20px;">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Описание</div>
+            <div>{{ material.description }}</div>
+        </div>
+        {% endif %}
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            {% if material.color %}
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Цвет</div>
+                <div style="font-weight: 600;">{{ material.color }}</div>
+            </div>
+            {% endif %}
+            {% if material.width %}
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Ширина</div>
+                <div style="font-weight: 600;">{{ material.width }} см</div>
+            </div>
+            {% endif %}
+            {% if material.density %}
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Плотность</div>
+                <div style="font-weight: 600;">{{ material.density }} г/м²</div>
+            </div>
+            {% endif %}
+            {% if material.composition %}
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Состав</div>
+                <div style="font-weight: 600;">{{ material.composition }}</div>
+            </div>
+            {% endif %}
+            {% if material.price_per_unit > 0 %}
+            <div>
+                <div style="font-size: 12px; color: var(--text-muted);">Цена за ед.</div>
+                <div style="font-weight: 600; color: var(--success);">{{ material.price_per_unit|floatformat:2 }} ₽</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if material.contractor %}
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <div style="font-size: 12px; color: var(--text-muted);">Поставщик</div>
+            <div style="font-weight: 600;">{{ material.contractor.name }}</div>
+            <div style="font-size: 13px; color: var(--text-muted);">{{ material.contractor.contact_info }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Использование в производстве -->
+{% if material.used_in_products.exists %}
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">🏭 Использование в производстве</h3>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">
+        Этот материал используется в {{ material.used_in_products.count }} моделях спецодежды
+    </p>
+    <div class="operation-list">
+        {% for req in material.used_in_products.all|slice:":5" %}
+        <a href="{% url 'template_detail' req.product_template.id %}" class="operation-item" style="text-decoration: none; color: inherit;">
+            <div class="operation-icon" style="background: rgba(0, 234, 255, 0.15);">👷</div>
+            <div class="operation-content">
+                <div class="operation-title">{{ req.product_template.name }}</div>
+                <div class="operation-meta">
+                    Норма: {{ req.quantity_per_unit }} {{ material.unit }} на изделие
+                    {% if req.waste_percent > 0 %}(отходы {{ req.waste_percent }}%){% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- История -->
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">📜 История операций</h3>
+    {% if receipts or issues %}
+    <div class="operation-list">
+        {% for r in receipts %}
+        <div class="operation-item receipt">
+            <div class="operation-icon">➕</div>
+            <div class="operation-content">
+                <div class="operation-title">Приход +{{ r.quantity }} {{ material.unit }}</div>
+                <div class="operation-meta">{{ r.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+            <div class="operation-quantity" style="color: var(--success);">+{{ r.quantity }}</div>
+        </div>
+        {% endfor %}
+        {% for i in issues %}
+        <div class="operation-item issue">
+            <div class="operation-icon">➖</div>
+            <div class="operation-content">
+                <div class="operation-title">Расход -{{ i.quantity }} {{ material.unit }}</div>
+                <div class="operation-meta">{{ i.issued_to }} | {{ i.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+            <div class="operation-quantity" style="color: var(--danger);">-{{ i.quantity }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 40px;">
+        <div class="empty-state-icon">📭</div>
+        <p>Операций пока нет</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Оборот -->
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">📈 Оборот за последние 30 дней</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+        <div class="text-center">
+            <div style="font-size: 32px; font-weight: 700; color: var(--success);">{{ turnover.receipts }}</div>
+            <div style="color: var(--text-muted);">Приход</div>
+        </div>
+        <div class="text-center">
+            <div style="font-size: 32px; font-weight: 700; color: var(--danger);">{{ turnover.issues }}</div>
+            <div style="color: var(--text-muted);">Расход</div>
+        </div>
+        <div class="text-center">
+            <div style="font-size: 32px; font-weight: 700; color: var(--primary);">
+                {{ turnover.receipts|add:turnover.issues }}
+            </div>
+            <div style="color: var(--text-muted);">Чистый оборот</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

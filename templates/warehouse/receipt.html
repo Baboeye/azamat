@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Приход материалов</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <select name="material" required>
+        {% for m in materials %}
+            <option value="{{ m.id }}">{{ m.name }} ({{ m.quantity }} {{ m.unit }})</option>
+        {% endfor %}
+    </select>
+
+    <input type="number" step="0.01" name="quantity" placeholder="Количество" required>
+
+    <button type="submit">Принять</button>
+</form>
+
+{% endblock %}

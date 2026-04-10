@@ -1,0 +1,42 @@
+<!-- В файле warehouse/templates/warehouse/reports.html -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Отчеты</h1>
+
+    <h2>Приходы</h2>
+    <table class="table">
+        <tr>
+            <th>Дата</th>
+            <th>Материал</th>
+            <th>Количество</th>
+            <th>Создано</th>
+        </tr>
+        {% for receipt in receipts %}
+            <tr>
+                <td>{{ receipt.created_at }}</td>
+                <td>{{ receipt.material.name }}</td>
+                <td>{{ receipt.quantity }}</td>
+                <td>{{ receipt.created_by }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Расходы</h2>
+    <table class="table">
+        <tr>
+            <th>Дата</th>
+            <th>Материал</th>
+            <th>Количество</th>
+            <th>Куда</th>
+        </tr>
+        {% for issue in issues %}
+            <tr>
+                <td>{{ issue.created_at }}</td>
+                <td>{{ issue.material.name }}</td>
+                <td>{{ issue.quantity }}</td>
+                <td>{{ issue.issued_to }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

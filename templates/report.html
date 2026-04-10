@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Отчёт по расходу</h1>
+
+<table>
+<tr>
+    <th>Дата</th>
+    <th>Материал</th>
+    <th>Количество</th>
+    <th>Куда</th>
+    <th>Кому</th>
+</tr>
+
+{% for i in issues %}
+<tr>
+    <td>{{ i.created_at|date:"d.m.Y H:i" }}</td>
+    <td>{{ i.material.name }}</td>
+    <td>{{ i.quantity }} {{ i.material.unit }}</td>
+    <td>{{ i.destination }}</td>
+    <td>{{ i.issued_to }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

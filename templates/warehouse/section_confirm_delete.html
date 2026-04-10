@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Удалить секцию - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Подтверждение удаления</h1>
+</div>
+
+<div class="card" style="max-width: 600px; text-align: center; padding: 40px;">
+    <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+    
+    <h2 style="margin-bottom: 16px; color: var(--danger);">Вы уверены?</h2>
+    
+    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 16px;">
+        Вы собираетесь удалить секцию <strong>"{{ section.name }}"</strong>.
+        <br>Это действие нельзя отменить.
+    </p>
+    
+    {% if section.materials.exists %}
+    <div class="alert alert-error" style="margin-bottom: 24px; text-align: left;">
+        <strong>Ошибка!</strong> В этой секции есть материалы ({{ section.materials.count }} шт.). 
+        Переместите их в другую секцию перед удалением.
+    </div>
+    <a href="{% url 'warehouse' %}" class="btn btn-secondary">← Назад к складу</a>
+    {% else %}
+    <form method="post" style="display: flex; gap: 12px; justify-content: center;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Да, удалить</button>
+        <a href="{% url 'warehouse' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Добавить материал - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Добавить материал</h1>
+</div>
+
+<div class="card">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+            <div class="form-group">
+                <label class="form-label">Название *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Артикул *</label>
+                {{ form.article }}
+                {% if form.article.errors %}
+                <div class="form-error">{{ form.article.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Описание</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Количество *</label>
+                {{ form.quantity }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Ед. измерения *</label>
+                {{ form.unit }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Цена за единицу (₽)</label>
+                {{ form.price_per_unit }}
+                <small style="color: var(--text-muted); font-size: 12px;">
+                    Цена за метр, кг или штуку для расчета себестоимости производства
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Минимальный остаток</label>
+                {{ form.min_stock }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Секция *</label>
+                {{ form.section }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Поставщик</label>
+                {{ form.contractor }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Цвет</label>
+                {{ form.color }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Ширина (см)</label>
+                {{ form.width }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Плотность (г/м²)</label>
+                {{ form.density }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Состав</label>
+                {{ form.composition }}
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Изображение</label>
+                {{ form.image }}
+            </div>
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+            <a href="{% url 'materials' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

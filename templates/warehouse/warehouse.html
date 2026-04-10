@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Склад - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Склад</h1>
+    <a href="{% url 'add_section' %}" class="btn btn-primary">➕ Добавить секцию</a>
+</div>
+
+{% if sections %}
+<div class="grid-2">
+    {% for section in sections %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3>{{ section.name }}</h3>
+            <a href="{% url 'delete_section' section.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить секцию?')">🗑️</a>
+        </div>
+        
+        {% if section.description %}
+        <p style="color: var(--text-muted); margin-bottom: 16px;">{{ section.description }}</p>
+        {% endif %}
+        
+        <div style="margin-bottom: 16px;">
+            <span class="badge badge-primary">{{ section.materials.count }} материалов</span>
+        </div>
+        
+        {% if section.materials.all %}
+        <div class="operation-list">
+            {% for material in section.materials.all|slice:":5" %}
+            <a href="{% url 'material_detail' material.id %}" class="operation-item" style="text-decoration: none; color: inherit;">
+                <div class="operation-content">
+                    <div class="operation-title">{{ material.name }}</div>
+                    <div class="operation-meta">{{ material.quantity }} {{ material.unit }}</div>
+                </div>
+                {% if material.is_low_stock %}
+                <span class="badge badge-danger">⚠️</span>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% if section.materials.count > 5 %}
+        <p style="margin-top: 12px; color: var(--text-muted); font-size: 13px;">
+            И ещё {{ section.materials.count|add:"-5" }} материалов...
+        </p>
+        {% endif %}
+        {% else %}
+        <div class="empty-state" style="padding: 30px;">
+            <p>Нет материалов</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>Секции не созданы</h3>
+    <a href="{% url 'add_section' %}" class="btn btn-primary">Создать первую секцию</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Расход: {{ material.name }}</h1>
+<p>Остаток: {{ material.quantity }} {{ material.unit }}</p>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+    <input type="number" step="0.01" name="quantity" placeholder="Количество" required>
+    <input type="text" name="destination" placeholder="Куда направлен" required>
+
+    <button type="submit">Списать</button>
+</form>
+
+{% endblock %}

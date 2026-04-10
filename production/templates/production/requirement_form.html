@@ -1,0 +1,163 @@
+<!-- production/templates/production/requirement_form.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">➕ Добавить материал в нормы расхода</h1>
+        <p class="page-subtitle">Укажите количество материала, необходимое для производства одного изделия</p>
+    </div>
+    <a href="{% url 'template_detail' template.id %}" class="btn btn-secondary">← Назад к модели</a>
+</div>
+
+<div style="max-width: 700px;">
+    <!-- Информация о модели -->
+    <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(0,234,255,0.05) 0%, rgba(0,119,255,0.05) 100%); border-color: var(--primary);">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 60px; height: 60px; border-radius: 12px; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                👷
+            </div>
+            <div style="flex: 1;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Модель спецодежды</div>
+                <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">{{ template.name }}</div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <code style="font-size: 13px;">{{ template.article }}</code>
+                    <span class="climate-badge climate-{{ template.category.climate_type }}" style="font-size: 10px;">
+                        {{ template.category.get_climate_type_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма -->
+    <div class="card">
+        <form method="post" id="requirementForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">
+                    📦 Материал *
+                    <span style="font-weight: normal; color: var(--text-muted);">— выберите из склада</span>
+                </label>
+                {{ form.material }}
+                <small style="color: var(--text-muted); font-size: 12px;">
+                    Только материалы с положительным остатком на складе
+                </small>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="form-group">
+                    <label class="form-label">
+                        📏 Количество на 1 изделие *
+                    </label>
+                    {{ form.quantity_per_unit }}
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        Точное количество без учета отходов
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        ♻️ Процент отходов
+                    </label>
+                    {{ form.waste_percent }}
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        Рекомендуется 5-15% для тканей
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Предпросмотр расчета -->
+            <div id="calculationPreview" style="display: none; margin-top: 20px; padding: 16px; background: var(--bg-hover); border-radius: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">📊 Предварительный расчет на партию</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-muted);">Чистый расход</div>
+                        <div id="cleanAmount" style="font-weight: 600; color: var(--primary);"></div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-muted);">Отходы</div>
+                        <div id="wasteAmount" style="font-weight: 600; color: var(--warning);"></div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-muted);">Итого с отходами</div>
+                        <div id="totalAmount" style="font-weight: 700; color: var(--success); font-size: 18px;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">
+                    📝 Примечания
+                </label>
+                {{ form.notes }}
+                <small style="color: var(--text-muted); font-size: 12px;">
+                    Особенности раскроя, направление ворса, расположение деталей и т.д.
+                </small>
+            </div>
+            
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary flex-1">
+                    💾 Добавить материал
+                </button>
+                <a href="{% url 'template_detail' template.id %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Подсказки -->
+    <div class="card" style="margin-top: 24px;">
+        <h4 style="margin-bottom: 16px; font-size: 16px;">💡 Рекомендации по нормированию</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 13px; color: var(--text-muted);">
+            <div>
+                <strong style="color: var(--text-primary); display: block; margin-bottom: 4px;">Ткани основные</strong>
+                Учитывайте направление ворса, рисунка, ширину полотна. Отходы обычно 8-12%.
+            </div>
+            <div>
+                <strong style="color: var(--text-primary); display: block; margin-bottom: 4px;">Фурнитура</strong>
+                Молнии, пуговицы, кнопки — точный подсчет без отходов.
+            </div>
+            <div>
+                <strong style="color: var(--text-primary); display: block; margin-bottom: 4px;">Нитки</strong>
+                Норма 150-200 м на комплект, запас 10% на обрывы.
+            </div>
+            <div>
+                <strong style="color: var(--text-primary); display: block; margin-bottom: 4px;">Утеплитель</strong>
+                Отходы до 15% из-за объема и кроя сложных деталей.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.querySelector('[name="quantity_per_unit"]');
+    const wasteInput = document.querySelector('[name="waste_percent"]');
+    const previewDiv = document.getElementById('calculationPreview');
+    const cleanAmountDiv = document.getElementById('cleanAmount');
+    const wasteAmountDiv = document.getElementById('wasteAmount');
+    const totalAmountDiv = document.getElementById('totalAmount');
+    
+    function updatePreview() {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const waste = parseFloat(wasteInput.value) || 0;
+        
+        if (quantity > 0) {
+            previewDiv.style.display = 'block';
+            const wasteAmount = quantity * (waste / 100);
+            const total = quantity + wasteAmount;
+            
+            cleanAmountDiv.textContent = quantity.toFixed(2) + ' м';
+            wasteAmountDiv.textContent = wasteAmount.toFixed(2) + ' м (' + waste + '%)';
+            totalAmountDiv.textContent = total.toFixed(2) + ' м';
+        } else {
+            previewDiv.style.display = 'none';
+        }
+    }
+    
+    quantityInput.addEventListener('input', updatePreview);
+    wasteInput.addEventListener('input', updatePreview);
+});
+</script>
+{% endblock %}

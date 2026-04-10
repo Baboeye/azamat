@@ -1,0 +1,43 @@
+<!-- production/templates/production/category_confirm_delete.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🗑️ Удаление категории</h1>
+</div>
+
+<div class="card" style="max-width: 600px; text-align: center; padding: 40px;">
+    <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+    
+    <h2 style="margin-bottom: 16px; color: var(--danger);">Вы уверены?</h2>
+    
+    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 16px;">
+        Вы собираетесь удалить категорию <strong>"{{ category.name }}"</strong>.
+        <br>Это действие нельзя отменить.
+    </p>
+    
+    {% if templates_count > 0 %}
+    <div class="alert alert-error" style="margin-bottom: 24px; text-align: left;">
+        <strong>❌ Удаление невозможно!</strong><br>
+        В этой категории есть <strong>{{ templates_count }}</strong> моделей спецодежды.
+        <br>Перед удалением категории необходимо:
+        <ul style="margin-top: 8px; padding-left: 20px;">
+            <li>Удалить все модели из категории, или</li>
+            <li>Перенести модели в другую категорию</li>
+        </ul>
+    </div>
+    <a href="{% url 'template_list' %}" class="btn btn-secondary">← Назад к списку</a>
+    
+    {% else %}
+    <div class="alert alert-warning" style="margin-bottom: 24px; text-align: left;">
+        <strong>⚠️ Внимание!</strong> Категория пуста и будет удалена безвозвратно.
+    </div>
+    
+    <form method="post" style="display: flex; gap: 12px; justify-content: center;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Да, удалить</button>
+        <a href="{% url 'template_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

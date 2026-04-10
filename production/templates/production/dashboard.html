@@ -1,0 +1,125 @@
+<!-- production/templates/production/dashboard.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🏭 Производство спецодежды</h1>
+        <p class="page-subtitle">Управление готовой продукцией и производственными заказами</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'production_order_create' %}" class="btn btn-primary">➕ Новый заказ</a>
+        <a href="{% url 'template_list' %}" class="btn btn-secondary">📋 Модели</a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="card stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="card-title">Всего изделий</div>
+        <div class="card-value">{{ total_products }}</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(0, 176, 155, 0.15);">✅</div>
+        <div class="card-title">Готово к отгрузке</div>
+        <div class="card-value" style="color: var(--success);">{{ products_ready }}</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(249, 212, 35, 0.15);">⚙️</div>
+        <div class="card-title">В производстве</div>
+        <div class="card-value" style="color: var(--warning);">{{ products_in_production }}</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Последние заказы -->
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">🕐 Последние производственные заказы</h3>
+        {% if recent_products %}
+        <div class="operation-list">
+            {% for product in recent_products %}
+            <a href="{% url 'product_detail' product.id %}" class="operation-item" style="text-decoration: none; color: inherit;">
+                <div class="operation-icon" style="background: 
+                    {% if product.template.category.climate_type == 'cold' %}rgba(0, 234, 255, 0.15)
+                    {% elif product.template.category.climate_type == 'hot' %}rgba(249, 212, 35, 0.15)
+                    {% else %}rgba(0, 176, 155, 0.15){% endif %};">
+                    {% if product.template.category.climate_type == 'cold' %}❄️
+                    {% elif product.template.category.climate_type == 'hot' %}☀️
+                    {% elif product.template.category.climate_type == 'extreme' %}⚠️
+                    {% else %}🌤️{% endif %}
+                </div>
+                <div class="operation-content">
+                    <div class="operation-title">{{ product.template.name }}</div>
+                    <div class="operation-meta">
+                        Партия {{ product.batch_number }} | {{ product.size }} | {{ product.color }}
+                    </div>
+                </div>
+                <div class="operation-quantity" style="font-size: 14px;">
+                    x{{ product.quantity_produced }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div style="margin-top: 16px; text-align: center;">
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">Вся продукция →</a>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 40px;">
+            <p>Нет производственных заказов</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Критические материалы -->
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">⚠️ Материалы требуют пополнения</h3>
+        {% if critical_materials %}
+        <div class="operation-list">
+            {% for material in critical_materials %}
+            <div class="operation-item" style="border-left: 3px solid var(--danger);">
+                <div class="operation-content">
+                    <div class="operation-title">{{ material.name }}</div>
+                    <div class="operation-meta">
+                        Арт. {{ material.article }} | Мин. запас: {{ material.min_stock }} {{ material.unit }}
+                    </div>
+                </div>
+                <div class="operation-quantity" style="color: var(--danger);">
+                    {{ material.quantity }} {{ material.unit }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="margin-top: 16px; padding: 12px; background: rgba(255, 65, 108, 0.05); border-radius: 8px;">
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                Эти материалы используются в производстве, но их остаток ниже минимального. 
+                <a href="{% url 'materials' %}" style="color: var(--primary);">Перейти к закупкам →</a>
+            </p>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 40px;">
+            <div style="font-size: 48px;">✅</div>
+            <p>Все материалы в норме</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Категории спецодежды -->
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">🌍 Категории спецодежды по климату</h3>
+    <div class="stats-grid">
+        {% for cat in categories_stats %}
+        <div class="card" style="text-align: center;">
+            <span class="climate-badge climate-{{ cat.climate_type }}" style="margin-bottom: 12px;">
+                {{ cat.get_climate_type_display }}
+            </span>
+            <h4 style="margin-bottom: 8px;">{{ cat.name }}</h4>
+            <div style="font-size: 32px; font-weight: 700; color: var(--primary);">
+                {{ cat.products_count|default:"0" }}
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted);">изделий произведено</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

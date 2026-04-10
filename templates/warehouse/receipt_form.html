@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Приход {{ material.name }} - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Оформить приход</h1>
+</div>
+
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div style="font-size: 64px; margin-bottom: 16px;">📦</div>
+        <h2 style="margin-bottom: 8px;">{{ material.name }}</h2>
+        <p style="color: var(--text-muted);">Артикул: {{ material.article }}</p>
+    </div>
+    
+    <div style="background: rgba(0, 234, 255, 0.05); border: 1px solid rgba(0, 234, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);">Текущий остаток:</span>
+            <span style="font-size: 24px; font-weight: 700; color: var(--primary);">{{ material.quantity }} {{ material.unit }}</span>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label">Количество прихода *</label>
+            <input type="number" name="quantity" class="form-control" step="0.01" min="0.01" required autofocus placeholder="Введите количество">
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary flex-1">➕ Оформить приход</button>
+            <a href="{% url 'material_detail' material.id %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

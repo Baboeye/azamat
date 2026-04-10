@@ -1,0 +1,67 @@
+[
+    {
+        "model": "production.producttemplate",
+        "pk": 1,
+        "fields": {
+            "name": "Костюм \"Север-1\" для нефтяников",
+            "article": "SN-KS-001-W",
+            "category": 1,
+            "protection_level": "high",
+            "description": "Зимний костюм для работы на нефтяных вышках. Влагостойкий, ветрозащитный.",
+            "weight_kg": 2.8,
+            "sizes_available": "44-46, 48-50, 52-54, 56-58, 60-62",
+            "colors_available": "Темно-синий, Оранжевый",
+            "is_active": true,
+            "created_at": "2024-01-01T00:00:00Z"
+        }
+    },
+
+    {
+        "model": "production.producttemplate",
+        "pk": 2,
+        "fields": {
+            "name": "Куртка \"Весна\" нефтяника",
+            "article": "SN-KD-002-M",
+            "category": 2,
+            "protection_level": "standard",
+            "description": "Демисезонная куртка с водоотталкивающей пропиткой",
+            "weight_kg": 1.4,
+            "sizes_available": "44-46, 48-50, 52-54, 56-58",
+            "colors_available": "Синий, Хаки",
+            "is_active": true,
+            "created_at": "2024-01-01T00:00:00Z"
+        }
+    },
+    {
+        "model": "production.producttemplate",
+        "pk": 3,
+        "fields": {
+            "name": "Костюм \"Пустыня\" летний",
+            "article": "SN-LS-003-H",
+            "category": 3,
+            "protection_level": "standard",
+            "description": "Легкий дышащий костюм для работы в жарких условиях",
+            "weight_kg": 0.9,
+            "sizes_available": "44-46, 48-50, 52-54, 56-58, 60-62, 64-66",
+            "colors_available": "Бежевый, Светло-серый",
+            "is_active": true,
+            "created_at": "2024-01-01T00:00:00Z"
+        }
+    },
+    {
+        "model": "production.producttemplate",
+        "pk": 4,
+        "fields": {
+            "name": "Костюм взрывозащитный \"Нефть-Газ\"",
+            "article": "SN-VZ-004-E",
+            "category": 4,
+            "protection_level": "max",
+            "description": "Специальная защитная одежда для работы с горючими веществами",
+            "weight_kg": 2.2,
+            "sizes_available": "44-46, 48-50, 52-54, 56-58",
+            "colors_available": "Оранжевый с синими вставками",
+            "is_active": true,
+            "created_at": "2024-01-01T00:00:00Z"
+        }
+    }
+]

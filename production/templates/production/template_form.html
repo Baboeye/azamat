@@ -1,0 +1,210 @@
+<!-- production/templates/production/template_form.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Новая{% endif %} модель спецодежды</h1>
+        <p class="page-subtitle">
+            {% if form.instance.pk %}
+            Редактирование {{ form.instance.article }}
+            {% else %}
+            Создание шаблона для производства спецодежды
+            {% endif %}
+        </p>
+    </div>
+    <a href="{% url 'template_list' %}" class="btn btn-secondary">← К списку моделей</a>
+</div>
+
+<div style="max-width: 900px;">
+    <div class="card">
+        <form method="post" enctype="multipart/form-data" id="templateForm">
+            {% csrf_token %}
+            
+            <!-- Основная информация -->
+            <div style="margin-bottom: 32px;">
+                <h3 style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                    📋 Основная информация
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Название модели *</label>
+                        {{ form.name }}
+                        <small style="color: var(--text-muted); font-size: 12px;">
+                            Например: Костюм "Север-1" для нефтяников
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Артикул *</label>
+                        {{ form.article }}
+                        <small style="color: var(--text-muted); font-size: 12px;">
+                            Уникальный код, например: SN-2024-Z-001
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Категория (климат) *</label>
+                        {{ form.category }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Уровень защиты *</label>
+                        {{ form.protection_level }}
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Описание</label>
+                    {{ form.description }}
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        Особенности модели, назначение, условия эксплуатации
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Характеристики -->
+            <div style="margin-bottom: 32px;">
+                <h3 style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                    ⚖️ Характеристики и размеры
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Вес комплекта, кг *</label>
+                        {{ form.weight_kg }}
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">Доступные размеры</label>
+                        {{ form.sizes_available }}
+                        <small style="color: var(--text-muted); font-size: 12px;">
+                            Через запятую, например: 44-46, 48-50, 52-54
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Доступные цвета</label>
+                    {{ form.colors_available }}
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        Через запятую, основные цвета для заказов
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Изображения -->
+            <div style="margin-bottom: 32px;">
+                <h3 style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                    🖼️ Изображения
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Фото готового изделия</label>
+                        {{ form.image }}
+                        {% if form.instance.image %}
+                        <div style="margin-top: 12px;">
+                            <img src="{{ form.instance.image.url }}" alt="Текущее фото" style="max-width: 200px; max-height: 150px; border-radius: 8px; object-fit: cover;">
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Текущее фото</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Технический чертеж</label>
+                        {{ form.technical_drawing }}
+                        {% if form.instance.technical_drawing %}
+                        <div style="margin-top: 12px;">
+                            <img src="{{ form.instance.technical_drawing.url }}" alt="Текущий чертеж" style="max-width: 200px; max-height: 150px; border-radius: 8px; object-fit: cover;">
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Текущий чертеж</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Статус -->
+            <div style="margin-bottom: 32px;">
+                <h3 style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                    ⚙️ Настройки
+                </h3>
+                
+                <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-hover); border-radius: 10px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">Активная модель</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">
+                            Можно использовать для создания производственных заказов
+                        </div>
+                    </div>
+                    <div>
+                        {{ form.is_active }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Кнопки -->
+            <div style="display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border);">
+                <button type="submit" class="btn btn-primary btn-lg flex-1">
+                    {% if form.instance.pk %}💾 Сохранить изменения{% else %}💾 Создать модель{% endif %}
+                </button>
+                <a href="{% url 'template_list' %}" class="btn btn-secondary btn-lg">Отмена</a>
+            </div>
+        </form>
+    </div>
+    
+    {% if not form.instance.pk %}
+    <!-- Подсказки для новой модели -->
+    <div class="card" style="margin-top: 24px;">
+        <h4 style="margin-bottom: 16px;">📌 После создания модели не забудьте:</h4>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-hover); border-radius: 8px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">1</div>
+                <div>Добавить нормы расхода материалов (ткани, фурнитура, нитки)</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-hover); border-radius: 8px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+                <div>Проверить расчет себестоимости на тестовой партии</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-hover); border-radius: 8px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+                <div>Запустить в производство первую партию</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Автоматическая генерация артикула при вводе названия (только для новых)
+    {% if not form.instance.pk %}
+    const nameInput = document.querySelector('[name="name"]');
+    const articleInput = document.querySelector('[name="article"]');
+    
+    nameInput.addEventListener('blur', function() {
+        if (!articleInput.value && nameInput.value) {
+            // Транслитерация и формирование артикула
+            const translit = {
+                'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+                'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+                'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+                'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+                'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+                ' ': '-', '-': '-'
+            };
+            
+            let translited = nameInput.value.toLowerCase().split('').map(char => 
+                translit[char] || char
+            ).join('').substring(0, 15);
+            
+            const year = new Date().getFullYear();
+            const random = Math.floor(Math.random() * 900) + 100;
+            articleInput.value = `SN-${year}-${translited}-${random}`.toUpperCase();
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

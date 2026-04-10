@@ -1,0 +1,155 @@
+<!-- production/templates/production/base_production.html -->
+{% extends "base.html" %}
+{% block title %}Производство - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.climate-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.climate-cold { background: rgba(0, 234, 255, 0.15); color: #00eaff; }
+.climate-moderate { background: rgba(0, 176, 155, 0.15); color: #00b09b; }
+.climate-hot { background: rgba(249, 212, 35, 0.15); color: #f9d423; }
+.climate-extreme { background: rgba(255, 65, 108, 0.15); color: #ff416c; }
+
+.protection-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.protection-level::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.protection-basic::before { background: var(--text-muted); }
+.protection-standard::before { background: var(--success); }
+.protection-high::before { background: var(--warning); }
+.protection-max::before { background: var(--danger); }
+
+.material-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+.material-check.enough { border-left: 3px solid var(--success); }
+.material-check.shortage { border-left: 3px solid var(--danger); }
+
+.production-card {
+    position: relative;
+    overflow: hidden;
+}
+.production-card::after {
+    content: attr(data-status);
+    position: absolute;
+    top: 12px;
+    right: -30px;
+    transform: rotate(45deg);
+    padding: 4px 40px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: white;
+}
+.production-card[data-status="Готов"]::after { background: var(--success); }
+.production-card[data-status="В производстве"]::after { background: var(--warning); }
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Для светлой темы - принудительно белый текст на зеленой кнопке */
+[data-theme="light"] .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .btn-success:hover {
+    color: #ffffff !important;
+}
+
+/* Исправление выпадающих списков в светлой теме */
+[data-theme="light"] select.form-control {
+    background-color: #ffffff;
+    color: #1a202c;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] select.form-control option {
+    background-color: #ffffff;
+    color: #1a202c;
+}
+
+/* Фикс для Firefox */
+[data-theme="light"] select.form-control:-moz-focusring {
+    color: #1a202c;
+}
+
+/* Фикс для Chrome/Safari */
+[data-theme="light"] select.form-control:focus {
+    background-color: #ffffff;
+    color: #1a202c;
+}
+
+/* Общие стили для всех input и select в светлой теме */
+[data-theme="light"] input.form-control,
+[data-theme="light"] textarea.form-control,
+[data-theme="light"] select.form-control {
+    background-color: #ffffff;
+    color: #1a202c;
+    border: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] input.form-control:focus,
+[data-theme="light"] textarea.form-control:focus,
+[data-theme="light"] select.form-control:focus {
+    background-color: #ffffff;
+    color: #1a202c;
+    border-color: #0077ff;
+    box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.15);
+}
+
+/* Placeholder в светлой теме */
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+    color: #a0aec0;
+}
+
+/* Фикс для стрелки выпадающего списка в светлой теме */
+[data-theme="light"] select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a5568' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+/* Стили для disabled опций */
+[data-theme="light"] select.form-control option:disabled {
+    color: #a0aec0;
+    background-color: #f7fafc;
+}
+</style>
+{% endblock %}

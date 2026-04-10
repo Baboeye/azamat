@@ -1,0 +1,137 @@
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">💰 Выручка за месяц</h1>
+        <p class="page-subtitle">{{ month_name }}</p>
+    </div>
+    <form method="get" class="flex gap-2" style="align-items: center;">
+        <input type="month" name="month" value="{{ month }}" class="form-control" style="width: auto;">
+        <button type="submit" class="btn btn-primary">Показать</button>
+    </form>
+</div>
+
+<!-- Сводка -->
+<div class="stats-grid">
+    <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(0, 176, 155, 0.15);">💵</div>
+        <div class="card-title">Выручка</div>
+        <div class="card-value" style="color: var(--success);">{{ total_revenue|floatformat:2 }} ₽</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+            {{ total_quantity }} шт. продукции
+        </div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(249, 212, 35, 0.15);">📊</div>
+        <div class="card-title">Себестоимость</div>
+        <div class="card-value" style="color: var(--warning);">{{ total_cost|floatformat:2 }} ₽</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(0, 234, 255, 0.15);">📈</div>
+        <div class="card-title">Прибыль</div>
+        <div class="card-value" style="color: var(--primary);">{{ total_profit|floatformat:2 }} ₽</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(0, 119, 255, 0.15);">🎯</div>
+        <div class="card-title">Маржа</div>
+        <div class="card-value" style="color: var(--info);">{{ profit_margin|floatformat:1 }}%</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+            {{ total_shipments }} отгрузок
+        </div>
+    </div>
+</div>
+
+<!-- Статистика по категориям -->
+{% if category_stats %}
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">📊 По категориям продукции</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+        {% for category, stats in category_stats.items %}
+        <div style="padding: 16px; background: var(--bg-hover); border-radius: 10px;">
+            <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">{{ category }}</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                <div>
+                    <div style="color: var(--text-muted);">Выручка</div>
+                    <div style="color: var(--success); font-weight: 600;">{{ stats.revenue|floatformat:2 }} ₽</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted);">Прибыль</div>
+                    <div style="color: var(--primary); font-weight: 600;">{{ stats.profit|floatformat:2 }} ₽</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted);">Количество</div>
+                    <div style="font-weight: 600;">{{ stats.quantity }} шт.</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted);">Отгрузок</div>
+                    <div style="font-weight: 600;">{{ stats.count }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Детализация отгрузок -->
+<div class="card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 20px;">📋 Детализация отгрузок</h3>
+    {% if shipments %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+                    <th style="padding: 12px;">Дата</th>
+                    <th style="padding: 12px;">Продукция</th>
+                    <th style="padding: 12px;">Партия</th>
+                    <th style="padding: 12px;">Заказчик</th>
+                    <th style="padding: 12px; text-align: center;">Кол-во</th>
+                    <th style="padding: 12px; text-align: right;">Цена</th>
+                    <th style="padding: 12px; text-align: right;">Сумма</th>
+                    <th style="padding: 12px; text-align: right;">Прибыль</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ship in shipments %}
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px;">{{ ship.date|date:"d.m.Y" }}</td>
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 500;">{{ ship.product }}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">{{ ship.article }}</div>
+                    </td>
+                    <td style="padding: 12px;"><code style="font-size: 12px;">{{ ship.batch }}</code></td>
+                    <td style="padding: 12px;">{{ ship.customer }}</td>
+                    <td style="padding: 12px; text-align: center;">{{ ship.quantity }}</td>
+                    <td style="padding: 12px; text-align: right;">{{ ship.unit_price|floatformat:2 }} ₽</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; color: var(--success);">{{ ship.revenue|floatformat:2 }} ₽</td>
+                    <td style="padding: 12px; text-align: right; color: var(--primary);">{{ ship.profit|floatformat:2 }} ₽</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot style="background: var(--bg-hover); font-weight: 600;">
+                <tr>
+                    <td colspan="4" style="padding: 12px; text-align: right;">ИТОГО:</td>
+                    <td style="padding: 12px; text-align: center;">{{ total_quantity }}</td>
+                    <td></td>
+                    <td style="padding: 12px; text-align: right; color: var(--success);">{{ total_revenue|floatformat:2 }} ₽</td>
+                    <td style="padding: 12px; text-align: right; color: var(--primary);">{{ total_profit|floatformat:2 }} ₽</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 40px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+        <p>Нет отгрузок за выбранный период</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Навигация по месяцам -->
+<div class="flex gap-2" style="margin-top: 24px; justify-content: space-between;">
+    <a href="?month={{ prev_month }}" class="btn btn-secondary">← {{ prev_month }}</a>
+    <a href="{% url 'production_dashboard' %}" class="btn btn-secondary">На дашборд</a>
+    <a href="?month={{ next_month }}" class="btn btn-secondary">{{ next_month }} →</a>
+</div>
+{% endblock %}

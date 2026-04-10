@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Удалить материал - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Подтверждение удаления</h1>
+</div>
+
+<div class="card" style="max-width: 600px; text-align: center; padding: 40px;">
+    <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+    
+    <h2 style="margin-bottom: 16px; color: var(--danger);">Вы уверены?</h2>
+    
+    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 16px;">
+        Вы собираетесь удалить материал <strong>"{{ material.name }}"</strong> ({{ material.article }}).
+        <br>Это действие нельзя отменить.
+    </p>
+    
+    <form method="post" style="display: flex; gap: 12px; justify-content: center;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Да, удалить</button>
+        <a href="{% url 'materials' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

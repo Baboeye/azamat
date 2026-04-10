@@ -1,0 +1,85 @@
+<!-- warehouse/templates/warehouse/audit_log.html -->
+{% extends "base.html" %}
+{% block title %}Журнал операций - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📋 Журнал операций</h1>
+        <p class="page-subtitle">История всех складских операций</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">← Назад</a>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="card mb-3">
+    <form method="get" class="filter-bar">
+        <select name="action" class="form-control">
+            <option value="">Все операции</option>
+            {% for code, name in action_choices %}
+            <option value="{{ code }}" {% if request.GET.action == code %}selected{% endif %}>
+                {{ name }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">🔍 Фильтр</button>
+        <a href="{% url 'audit_log' %}" class="btn btn-secondary">Сбросить</a>
+    </form>
+</div>
+
+<!-- Журнал -->
+<div class="card">
+    {% if logs %}
+    <div class="operation-list">
+        {% for log in logs %}
+        <div class="operation-item {{ log.action }}">
+            <div class="operation-icon">{{ log.action_icon }}</div>
+            <div class="operation-content">
+                <div class="operation-title">
+                    {{ log.get_action_display }}: {{ log.material.name }}
+                </div>
+                <div class="operation-meta">
+                    {% if log.user %}{{ log.user.username }}{% else %}Система{% endif %} | 
+                    {{ log.created_at|date:"d.m.Y H:i" }}
+                </div>
+                {% if log.details %}
+                <div style="margin-top: 4px; font-size: 12px; color: var(--text-muted);">
+                    {{ log.details }}
+                </div>
+                {% endif %}
+            </div>
+            {% if log.quantity != 0 %}
+            <div class="operation-quantity" style="{% if log.quantity > 0 %}color: var(--success);{% else %}color: var(--danger);{% endif %}">
+                {% if log.quantity > 0 %}+{% endif %}{{ log.quantity }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Пагинация -->
+    {% if logs.has_other_pages %}
+    <div class="pagination" style="margin-top: 20px;">
+        {% if logs.has_previous %}
+        <a href="?page={{ logs.previous_page_number }}{% if request.GET.action %}&action={{ request.GET.action }}{% endif %}" class="page-link">←</a>
+        {% endif %}
+        
+        <span class="page-link active">{{ logs.number }}</span>
+        
+        {% if logs.has_next %}
+        <a href="?page={{ logs.next_page_number }}{% if request.GET.action %}&action={{ request.GET.action }}{% endif %}" class="page-link">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="empty-state" style="padding: 60px 20px;">
+        <div class="empty-state-icon">📭</div>
+        <h3>Журнал пуст</h3>
+        <p style="color: var(--text-muted);">Выполните операции на складе, чтобы они отобразились здесь</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Учет материалов{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar">
+        <div class="logo" title="Азнакай киемнерэ">
+            <span class="logo-main">Учет материалов</span>
+            <span class="logo-sub">Азнакай киемнерэ</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'dashboard' %}">📊 Панель</a>
+            <a href="{% url 'materials' %}">📦 Материалы</a>
+            <a href="{% url 'warehouse' %}">🏭 Склад</a>
+            <a href="{% url 'production_dashboard' %}">🏭 Производство</a>
+            <a href="{% url 'contractors' %}">🏢 Контрагенты</a>
+            <a href="{% url 'audit_log' %}">📋 Журнал</a>
+            <button type="button" class="theme-toggle" onclick="toggleTheme()" title="Сменить тему">
+                <span id="theme-icon">☀️</span>
+            </button>
+            <a href="{% url 'logout' %}">🚪 Выход</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+        
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

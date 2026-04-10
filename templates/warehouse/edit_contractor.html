@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Редактировать {{ contractor.name }} - MaterialSys{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Редактировать контрагента</h1>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Название организации *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Тип контрагента *</label>
+                {{ form.contractor_type }}
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Юридический адрес *</label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                <div class="form-error">{{ form.address.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Контактная информация</label>
+                {{ form.contact_info }}
+                <small style="color: var(--text-muted); font-size: 12px;">Телефон, email, контактное лицо</small>
+            </div>
+        </div>
+        
+        <!-- Информация о связанных материалах -->
+        {% if contractor.materials.exists %}
+        <div style="margin-top: 24px; padding: 16px; background: var(--input-bg); border-radius: 10px; border-left: 4px solid var(--primary);">
+            <h4 style="margin-bottom: 12px; font-size: 14px;">📦 Связанные материалы</h4>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
+                Этот контрагент указан как поставщик для {{ contractor.materials.count }} материалов:
+            </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                {% for material in contractor.materials.all|slice:":5" %}
+                <a href="{% url 'material_detail' material.id %}" class="badge badge-primary" style="text-decoration: none;">
+                    {{ material.name }}
+                </a>
+                {% endfor %}
+                {% if contractor.materials.count > 5 %}
+                <span class="badge" style="background: var(--border);">+{{ contractor.materials.count|add:"-5" }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary">💾 Сохранить изменения</button>
+            <a href="{% url 'contractors' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

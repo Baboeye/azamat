@@ -1,0 +1,295 @@
+<!-- production/templates/production/production_order_form.html -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🏭 Новый заказ на производство</h1>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <form method="post" id="productionForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Модель спецодежды *</label>
+                {{ form.template }}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label class="form-label">Количество *</label>
+                    {{ form.quantity }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Дата производства *</label>
+                    {{ form.production_date }}
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label class="form-label">Размер *</label>
+                    {{ form.size }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Цвет *</label>
+                    {{ form.color }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Номер партии *</label>
+                {{ form.batch_number }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Место хранения</label>
+                {{ form.warehouse_location }}
+            </div>
+            
+            <!-- Дополнительные поля для расчета стоимости -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="form-group">
+                    <label class="form-label">Наценка %</label>
+                    {{ form.markup_percent }}
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        Процент наценки на готовую продукцию
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Стоимость работы (₽)</label>
+                    {{ form.labor_cost }}
+                    <small style="color: var(--text-muted); font-size: 12px;">
+                        Затраты на работу за всю партию
+                    </small>
+                </div>
+            </div>
+            
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary flex-1" id="submitBtn" disabled style="opacity: 0.5;">
+                    🚀 Запустить в производство
+                </button>
+                <a href="{% url 'production_dashboard' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Проверка материалов в реальном времени -->
+    <div class="card">
+        <h3 style="margin-bottom: 20px;">📦 Проверка материалов</h3>
+        <div id="materialCheck">
+            <p style="color: var(--text-muted); text-align: center; padding: 40px;">
+                Выберите модель и укажите количество для проверки наличия материалов
+            </p>
+        </div>
+        
+        <div id="materialDetails" style="display: none;">
+            <div style="margin-bottom: 16px; padding: 16px; background: var(--bg-input); border-radius: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Общий статус</div>
+                <div id="overallStatus" style="font-weight: 600;"></div>
+            </div>
+            
+            <!-- Блок с оценкой стоимости -->
+            <div id="costEstimate" style="display: none; margin-bottom: 16px; padding: 16px; background: rgba(0, 119, 255, 0.1); border-radius: 10px; border: 1px solid var(--primary);">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">💰 Предварительная стоимость производства</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-muted);">Материалы</div>
+                        <div id="materialCost" style="font-weight: 600; color: var(--primary);">0.00 ₽</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-muted);">Работа</div>
+                        <div id="laborCostDisplay" style="font-weight: 600;">0.00 ₽</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 11px; color: var(--text-muted);">Цена продажи</div>
+                        <div id="sellingPrice" style="font-weight: 700; color: var(--success); font-size: 16px;">0.00 ₽</div>
+                    </div>
+                </div>
+                <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted); text-align: center;">
+                    Наценка: <span id="markupDisplay">20</span>%
+                </div>
+            </div>
+            
+            <div id="materialsList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateSelect = document.querySelector('[name="template"]');
+    const quantityInput = document.querySelector('[name="quantity"]');
+    const markupInput = document.querySelector('[name="markup_percent"]');
+    const laborInput = document.querySelector('[name="labor_cost"]');
+    const materialCheckDiv = document.getElementById('materialCheck');
+    const materialDetailsDiv = document.getElementById('materialDetails');
+    const overallStatusDiv = document.getElementById('overallStatus');
+    const materialsListDiv = document.getElementById('materialsList');
+    const costEstimateDiv = document.getElementById('costEstimate');
+    const materialCostDiv = document.getElementById('materialCost');
+    const laborCostDisplay = document.getElementById('laborCostDisplay');
+    const sellingPriceDiv = document.getElementById('sellingPrice');
+    const markupDisplay = document.getElementById('markupDisplay');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    let currentMaterialCost = 0;
+    
+    function checkMaterials() {
+        const templateId = templateSelect.value;
+        const quantity = quantityInput.value;
+        const markup = parseFloat(markupInput?.value) || 20;
+        const labor = parseFloat(laborInput?.value) || 0;
+        
+        console.log('DEBUG: templateId=', templateId, 'quantity=', quantity);
+        
+        if (!templateId || !quantity || quantity < 1) {
+            materialCheckDiv.style.display = 'block';
+            materialDetailsDiv.style.display = 'none';
+            costEstimateDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            return;
+        }
+        
+        // Показываем загрузку
+        materialCheckDiv.innerHTML = '<p style="text-align: center; padding: 40px;">⏳ Проверка материалов...</p>';
+        materialCheckDiv.style.display = 'block';
+        materialDetailsDiv.style.display = 'none';
+        
+        fetch(`/production/api/check-materials/?template_id=${templateId}&quantity=${quantity}`)
+            .then(response => {
+                console.log('DEBUG: response status=', response.status);
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('DEBUG: data=', data);
+                
+                materialCheckDiv.style.display = 'none';
+                materialDetailsDiv.style.display = 'block';
+                
+                if (data.error) {
+                    overallStatusDiv.innerHTML = `<span style="color: var(--danger);">❌ ${data.error}</span>`;
+                    materialsListDiv.innerHTML = '';
+                    costEstimateDiv.style.display = 'none';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    return;
+                }
+                
+                // Проверяем, есть ли материалы
+                if (!data.materials || data.materials.length === 0) {
+                    overallStatusDiv.innerHTML = '<span style="color: var(--warning);">⚠️ У модели не заданы нормы расхода материалов</span>';
+                    materialsListDiv.innerHTML = '<p style="color: var(--text-muted); padding: 20px;">Добавьте материалы в шаблон модели</p>';
+                    costEstimateDiv.style.display = 'none';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    return;
+                }
+                
+                if (data.can_produce) {
+                    overallStatusDiv.innerHTML = '<span style="color: var(--success);">✅ Материалов достаточно</span>';
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                } else {
+                    overallStatusDiv.innerHTML = '<span style="color: var(--danger);">❌ Недостаточно материалов</span>';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                }
+                
+                // Сохраняем стоимость материалов
+                currentMaterialCost = data.estimated_cost || 0;
+                
+                // Обновляем отображение стоимости
+                updateCostDisplay(markup, labor);
+                
+                // Показываем блок стоимости
+                costEstimateDiv.style.display = 'block';
+                
+                // Список материалов
+                materialsListDiv.innerHTML = data.materials.map(m => `
+                    <div class="material-check ${m.enough ? 'enough' : 'shortage'}" 
+                         style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid ${m.enough ? 'var(--success)' : 'var(--danger)'};">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600;">${m.material_name}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">
+                                Арт. ${m.material_article} | ${m.price.toFixed(2)} ₽/${m.unit}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-family: monospace; font-weight: 600; color: ${m.enough ? 'var(--success)' : 'var(--danger)'};">
+                                ${m.required.toFixed(2)} / ${m.available.toFixed(2)} ${m.unit}
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-muted);">
+                                ${m.cost.toFixed(2)} ₽
+                            </div>
+                            ${!m.enough ? `<div style="font-size: 11px; color: var(--danger);">Не хватает: ${m.shortage.toFixed(2)}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('ERROR:', error);
+                materialCheckDiv.innerHTML = `<p style="color: var(--danger); text-align: center; padding: 40px;">❌ Ошибка загрузки: ${error.message}</p>`;
+                materialDetailsDiv.style.display = 'none';
+                costEstimateDiv.style.display = 'none';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            });
+    }
+    
+    function updateCostDisplay(markup, labor) {
+        materialCostDiv.textContent = currentMaterialCost.toFixed(2) + ' ₽';
+        laborCostDisplay.textContent = labor.toFixed(2) + ' ₽';
+        markupDisplay.textContent = markup;
+        
+        const totalCost = currentMaterialCost + labor;
+        const sellingPrice = totalCost * (1 + markup / 100);
+        sellingPriceDiv.textContent = sellingPrice.toFixed(2) + ' ₽';
+    }
+    
+    // Обработчики событий
+    if (templateSelect) {
+        templateSelect.addEventListener('change', checkMaterials);
+    }
+    if (quantityInput) {
+        quantityInput.addEventListener('input', debounce(checkMaterials, 500));
+    }
+    if (markupInput) {
+        markupInput.addEventListener('input', function() {
+            const markup = parseFloat(this.value) || 20;
+            const labor = parseFloat(laborInput?.value) || 0;
+            updateCostDisplay(markup, labor);
+        });
+    }
+    if (laborInput) {
+        laborInput.addEventListener('input', function() {
+            const markup = parseFloat(markupInput?.value) || 20;
+            const labor = parseFloat(this.value) || 0;
+            updateCostDisplay(markup, labor);
+        });
+    }
+    
+    // Инициализация при загрузке
+    if (templateSelect && templateSelect.value && quantityInput && quantityInput.value) {
+        checkMaterials();
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+});
+</script>
+{% endblock %}

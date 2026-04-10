@@ -1,0 +1,135 @@
+<!-- production/templates/production/template_list.html (обновленный с кнопками редактирования) -->
+{% extends "production/base_production.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📋 Модели спецодежды</h1>
+        <p class="page-subtitle">Шаблоны для производства спецодежды для нефтяников</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'category_create' %}" class="btn btn-secondary">➕ Категория</a>
+        <a href="{% url 'template_create' %}" class="btn btn-primary">➕ Модель</a>
+    </div>
+</div>
+
+<!-- Кнопка создания категории всегда видна сверху -->
+<div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(0,234,255,0.05) 0%, rgba(0,119,255,0.05) 100%);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 style="margin: 0; font-size: 18px;">🌍 Категории спецодежды</h3>
+            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px;">
+                Группировка моделей по климатическим зонам
+            </p>
+        </div>
+        <a href="{% url 'category_create' %}" class="btn btn-primary">
+            ➕ Добавить категорию
+        </a>
+    </div>
+</div>
+
+{% for category in categories %}
+<div class="card" style="margin-bottom: 24px;">
+    <!-- Шапка категории с кнопками управления -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="climate-badge climate-{{ category.climate_type }}">
+                {{ category.get_climate_type_display }}
+            </span>
+            <div>
+                <h3 style="margin: 0;">{{ category.name }}</h3>
+                <span style="color: var(--text-muted); font-size: 14px;">
+                    {{ category.temperature_range }}
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <span class="badge badge-primary">
+                {{ category.templates.count }} моделей
+            </span>
+            <a href="{% url 'category_edit' category.id %}" class="btn btn-secondary btn-sm" title="Редактировать">
+                ✏️
+            </a>
+            <a href="{% url 'category_delete' category.id %}" class="btn btn-danger btn-sm" title="Удалить">
+                🗑️
+            </a>
+        </div>
+    </div>
+    
+    {% if category.description %}
+    <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 14px;">
+        {{ category.description }}
+    </p>
+    {% endif %}
+    
+    {% if category.templates.exists %}
+    <div class="materials-grid">
+        {% for template in category.templates.all %}
+        <a href="{% url 'template_detail' template.id %}" class="material-card">
+            <div class="material-image-placeholder" style="height: 140px;">
+                {% if template.image %}
+                <img src="{{ template.image.url }}" alt="{{ template.name }}" style="max-height: 100%; object-fit: cover;">
+                {% else %}
+                👷
+                {% endif %}
+            </div>
+            <div class="material-body">
+                <div class="material-header">
+                    <div>
+                        <div class="material-title">{{ template.name }}</div>
+                        <div class="material-article">{{ template.article }}</div>
+                    </div>
+                </div>
+                <div style="margin: 12px 0;">
+                    <span class="protection-level protection-{{ template.protection_level }}">
+                        {{ template.get_protection_level_display }}
+                    </span>
+                </div>
+                <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted);">
+                    <span>⚖️ {{ template.weight_kg }} кг</span>
+                    <span>📏 {{ template.sizes_available }}</span>
+                </div>
+                <div style="margin-top: 12px;">
+                    <span class="badge badge-primary">
+                        {{ template.material_requirements.count }} материалов
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 40px; background: var(--bg-hover); border-radius: 10px;">
+        <p style="color: var(--text-muted); margin-bottom: 16px;">
+            В этой категории пока нет моделей
+        </p>
+        <a href="{% url 'template_create' %}" class="btn btn-secondary btn-sm">
+            Создать первую модель
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% empty %}
+<!-- Этот блок показывается только если вообще нет категорий -->
+<div class="card" style="text-align: center; padding: 60px 20px;">
+    <div style="font-size: 64px; margin-bottom: 20px;">📭</div>
+    <h3 style="margin-bottom: 16px;">Категории не созданы</h3>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">
+        Создайте первую категорию спецодежды, чтобы начать работу
+    </p>
+    <a href="{% url 'category_create' %}" class="btn btn-primary btn-lg">
+        ➕ Создать первую категорию
+    </a>
+</div>
+{% endfor %}
+
+<!-- Плавающая кнопка для быстрого доступа -->
+<div style="position: fixed; bottom: 30px; right: 30px; display: flex; gap: 12px;">
+    <a href="{% url 'category_create' %}" class="btn btn-secondary" style="box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        ➕ Категория
+    </a>
+    <a href="{% url 'template_create' %}" class="btn btn-primary" style="box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        ➕ Модель
+    </a>
+</div>
+{% endblock %}
