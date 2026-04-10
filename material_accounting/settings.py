@@ -30,11 +30,13 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+    for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,material-accounting.up.railway.app').split(',')
     if host.strip()
 ]
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()
+    origin.strip() 
+    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'https://material-accounting.up.railway.app,https://localhost:8000,http://localhost:8000').split(',') 
+    if origin.strip()
 ]
 
 
@@ -158,7 +160,17 @@ CSRF_COOKIE_SECURE = not DEBUG  # HTTPS only in production
 CSRF_COOKIE_HTTPONLY = False     # Allow JavaScript to read for AJAX
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
-SECURE_SSL_REDIRECT = not DEBUG
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
+
+# IMPORTANT: Disable SECURE_SSL_REDIRECT on Railway (proxy handles SSL)
+# Only enable on true HTTPS environments
+SECURE_SSL_REDIRECT = False
+
+# For Railway and similar proxies that add X-Forwarded-Proto header
+# This tells Django to trust the proxy's SSL information
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# HSTS - only in production on true HTTPS
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
