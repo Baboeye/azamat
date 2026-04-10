@@ -18,5 +18,8 @@ urlpatterns = [
     path('production/', include('production.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files in both DEBUG and PRODUCTION
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# IMPORTANT: WhiteNoise handles static files in production
+# In development, Django serves them via DEBUG=True

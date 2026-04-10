@@ -127,6 +127,15 @@
         .login-demo p {
             margin-bottom: 4px;
         }
+        
+        .login-demo code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            padding: 2px 6px;
+            background: rgba(0, 234, 255, 0.1);
+            border-radius: 4px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="login-page">
@@ -138,6 +147,14 @@
         
         <form method="post" class="login-form">
             {% csrf_token %}
+            
+            {% if messages %}
+            {% for message in messages %}
+            <div class="login-error">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
             
             {% if form.non_field_errors %}
             <div class="login-error">
@@ -159,8 +176,9 @@
         </form>
         
         <div class="login-demo">
-            <p><strong>Демо-доступ:</strong></p>
-            <p>admin / admin</p>
+            <p><strong>📋 Тестовые учетные данные:</strong></p>
+            <p>Логин: <code style="color: #00eaff;">azama</code></p>
+            <p>Пароль: <code style="color: #00eaff;">azamat</code></p>
         </div>
     </div>
 </body>
